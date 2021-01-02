@@ -51,6 +51,7 @@ while (1):
     enter_btn = driver.find_element_by_id('close')
     enter_btn.click()
     if (driver.current_url == 'http://elearning.nuk.edu.tw/m_student/m_stu_index.php'):
+        bsMain = BeautifulSoup(driver.page_source, 'lxml')  # BeautifulSoup抓課程總覽網頁
         print('\n登入成功~\n==========')
         time.sleep(2)  # 等待2秒
         break  # 直到帳號密碼正確才能跳出while迴圈
@@ -69,7 +70,6 @@ except:
     first_time = True  # 該使用者是第一次使用
 
 # NOTE: 幫第一次使用的學生建立json檔
-bsMain = BeautifulSoup(driver.page_source, 'lxml')  # BeautifulSoup抓課程總覽網頁
 if first_time:
     print('看起來你是第一次使用，讓我們先幫你擷取課程資料...')
     time.sleep(2)  # 等待2秒
@@ -103,10 +103,16 @@ while (1):
         while (1):
             confirm = int(input('警告：重新爬取課程將會取代原本的檔案，之前建立的備忘錄也會一併消失，確定要繼續？(0: 否/1: 是) '))
             if (confirm == 0):
-                print('動作已中斷\n==========')
+                print('動作已中斷')
+                time.sleep(2)  # 等待2秒
+                print('==========')
                 break
             elif (confirm == 1):
                 function.create_dict(bsMain, account)  # function.py
+                with open(f'./users/{account}.json', 'r', encoding='utf-8') as obj:
+                    user_dict = json.load(obj)  # 讀檔並轉成python字典型別，用user_dict接住
+                course_list = [[], [], [], [], []]
+                function.init_course_list(user_dict, course_list)
                 break
             else:
                 print('輸入的數值無效 請再試一次！\n')

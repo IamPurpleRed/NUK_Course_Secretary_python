@@ -1,3 +1,4 @@
+import time
 import json
 
 
@@ -15,9 +16,9 @@ def create_dict(bsMain, account):
         count += 1
         if (count == 2):
             print('找到課程：', td.text)
-            temp_course = td.text
+            temp_course = td.text  # 取出課程名稱
         elif (count == 5):
-            temp_weekday = td.text[1]
+            temp_weekday = td.text[1]  # 取出禮拜幾的那一個數字
         elif (count == 7):
             count = 0
             new_dict[temp_weekday][temp_course] = []
@@ -25,7 +26,9 @@ def create_dict(bsMain, account):
     with open(f'./users/{account}.json', 'w+', encoding='utf-8') as obj:
         json.dump(new_dict, obj, indent=4, ensure_ascii=False)
     obj.close()
-    print('已完成指定的工作！\n==========')
+    print('已完成指定的工作！')
+    time.sleep(2)  # 等待2秒
+    print('==========')
 
 
 # INFO: 初始化course_list
@@ -79,7 +82,9 @@ def course_select(wd_list, course_list):
     while (1):
         row = int(input('\n請選擇星期(1~5，按0離開) '))
         if (row == 0):
-            print('動作已中斷\n==========')
+            print('動作已中斷')
+            time.sleep(2)  # 等待2秒
+            print('==========')
             break
         elif (row >= 1) and (row <= 5):
             print('以下是', wd_list[row - 1], '的課程：', sep='')
@@ -107,14 +112,18 @@ def create_note(course_list, index, user_dict, account):
         print('\n即將於課程「', course, '」新增備忘事項：', new_note, sep='')
         confirm = int(input('確認加入？(0: 否/1: 是) '))
         if (confirm == 0):
-            print('動作已中斷\n==========')
+            print('動作已中斷')
+            time.sleep(2)  # 等待2秒
+            print('==========')
             break
         elif (confirm == 1):
             user_dict[str(index[0] + 1)][course].append(new_note)
             with open(f'./users/{account}.json', 'w+', encoding='utf-8') as obj:
                 json.dump(user_dict, obj, indent=4, ensure_ascii=False)
             obj.close()
-            print('已完成指定的工作！\n==========')
+            print('已完成指定的工作！')
+            time.sleep(2)  # 等待2秒
+            print('==========')
             break
         else:
             print('輸入的數值無效，請再試一次！')
