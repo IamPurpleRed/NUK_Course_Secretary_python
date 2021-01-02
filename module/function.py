@@ -110,7 +110,7 @@ def create_note(course_list, index, user_dict, account):
     new_note = input('請輸入新的備忘事項 ')
     while (1):
         print('\n即將於課程「', course, '」新增備忘事項：', new_note, sep='')
-        confirm = int(input('確認加入？(0: 否/1: 是) '))
+        confirm = int(input('你要確定餒？(0: 否/1: 是) '))
         if (confirm == 0):
             print('動作已中斷')
             time.sleep(2)  # 等待2秒
@@ -127,3 +127,47 @@ def create_note(course_list, index, user_dict, account):
             break
         else:
             print('輸入的數值無效，請再試一次！')
+
+
+# INFO: 刪除備忘錄
+def delete_note(course_list, index, user_dict, account):
+    back = False  # 為了要跳出外面的while迴圈而設立的布林值
+    course = course_list[index[0]][index[1]]
+    select_list = user_dict[str(index[0] + 1)][course]
+    print('\n以下是「', course, '」的所有備忘事項：', sep='')
+    for i, j in zip(range(1, len(select_list) + 1), select_list):
+        print(' ', i, ' ', j, sep='')
+    while (1):
+        select = int(input('\n請選擇要刪除的備忘事項(按0離開) '))
+        if (select == 0):
+            print('動作已中斷')
+            time.sleep(2)  # 等待2秒
+            print('==========')
+            break
+        elif (select >= 1) and (select <= len(select_list)):
+            while (1):
+                print('\n即將於課程「', course, '」刪除備忘事項：', select_list[select - 1], sep='')
+                confirm = int(input('刪除後就不能復原了，你要確定餒？(0: 否/1: 是) '))
+                if (confirm == 0):
+                    back = True  # 為了要跳出外面的while迴圈而設立的布林值
+                    print('動作已中斷')
+                    time.sleep(2)  # 等待2秒
+                    print('==========')
+                    break
+                elif (confirm == 1):
+                    back = True  # 為了要跳出外面的while迴圈而設立的布林值
+                    user_dict[str(index[0] + 1)][course].remove(select_list[select - 1])
+                    with open(f'./users/{account}.json', 'w+', encoding='utf-8') as obj:
+                        json.dump(user_dict, obj, indent=4, ensure_ascii=False)
+                    obj.close()
+                    print('已完成指定的工作！')
+                    time.sleep(2)  # 等待2秒
+                    print('==========')
+                    break
+                else:
+                    print('輸入的數值無效，請再試一次！')
+        else:
+            print('輸入的數值無效，請再試一次！')
+
+        if (back):
+            break

@@ -87,7 +87,7 @@ function.list_course(user_dict, wd)  # function.py
 
 # NOTE: 選單選項
 while (1):
-    print('主選單：\n 1 新增備忘錄\n 2 刪除備忘錄\n 3 列出今明兩天課程及備忘錄\n 4 重新建立使用者課程資料\n 0 離開\n')
+    print('主選單：\n 1 新增備忘錄\n 2 刪除備忘錄\n 3 列出今明兩天課程及備忘錄\n 4 重新建立使用者課程資料\n 5 列出所有課程及備忘清單\n 0 離開\n')
     choose = int(input('請選擇項目 '))
     if (choose == 0):
         print('掰波！')
@@ -96,12 +96,15 @@ while (1):
         index = function.course_select(wd_list, course_list)  # function.py
         if (index != None):
             function.create_note(course_list, index, user_dict, account)
-    # TODO: 刪除備忘錄的函式
+    elif (choose == 2):
+        index = function.course_select(wd_list, course_list)  # function.py
+        if (index != None):
+            function.delete_note(course_list, index, user_dict, account)
     elif (choose == 3):
         function.list_course(user_dict, wd)  # function.py
     elif (choose == 4):
         while (1):
-            confirm = int(input('警告：重新爬取課程將會取代原本的檔案，之前建立的備忘錄也會一併消失，確定要繼續？(0: 否/1: 是) '))
+            confirm = int(input('警告：重新爬取課程將會取代原本的檔案，之前建立的備忘錄也會一併消失，你要確定餒？(0: 否/1: 是) '))
             if (confirm == 0):
                 print('動作已中斷')
                 time.sleep(2)  # 等待2秒
