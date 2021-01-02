@@ -119,5 +119,7 @@ while (1):
                 break
             else:
                 print('輸入的數值無效 請再試一次！\n')
+    elif (choose == 5):
+        function.list_all(user_dict, wd_list, course_list)
     else:
         print('輸入的數值無效 請再試一次！\n==========')

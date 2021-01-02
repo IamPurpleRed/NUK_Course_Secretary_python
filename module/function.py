@@ -74,6 +74,7 @@ def list_course(user_dict, wd):
     else:
         print('\n明天放假啦~去去去耍廢')
 
+    time.sleep(2)  # 等待2秒
     print('==========')
 
 
@@ -171,3 +172,18 @@ def delete_note(course_list, index, user_dict, account):
 
         if (back):
             break
+
+
+# INFO: 列出所有課程及備忘錄
+def list_all(user_dict, wd_list, course_list):
+    for i in user_dict.keys():
+        print(wd_list[int(i) - 1], '：', sep='')
+        for j in course_list[int(i) - 1]:
+            print(' ', j, sep='')
+            if (len(user_dict[i][j]) == 0):
+                print('  <此課程沒有備忘錄>')
+            for k in user_dict[i][j]:
+                print(' - ', k, sep='')
+        print('\n', end='')
+    time.sleep(2)  # 等待2秒
+    print('==========')
