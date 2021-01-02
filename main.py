@@ -1,16 +1,22 @@
-import datetime
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options  # 不要彈出webdriver視窗
-import sys  # 結束程式
-import getpass  # 使密碼在輸入時不被看見
-import os  # 建立資料夾
-import json
-from bs4 import BeautifulSoup
-import lxml
 import time  # sleep函式
+import lxml
+from bs4 import BeautifulSoup
+import json
+import os  # 建立資料夾
+import getpass  # 使密碼在輸入時不被看見
+import sys  # 結束程式
+from selenium.webdriver.chrome.options import Options  # 不要彈出webdriver視窗
+from selenium import webdriver
+import datetime
 
-# 全域變數
+#INFO: 匯入自訂模組
+sys.path.append('./module/')  # 添加函式庫來源路徑
+import function  # 自定義module
+
+# INFO: 全域變數
 first_time = False
+user_dict = dict()
+course_list = [[], [], [], [], []]
 
 # INFO: 日期初始化
 y = datetime.date.today().year
@@ -46,7 +52,7 @@ while (1):
     enter_btn.click()
     if (driver.current_url == 'http://elearning.nuk.edu.tw/m_student/m_stu_index.php'):
         print('\n登入成功~\n==========')
-        time.sleep(3)  # 等待3秒
+        time.sleep(2)  # 等待2秒
         break  # 直到帳號密碼正確才能跳出while迴圈
     else:
         print('帳號或密碼輸入錯誤，請再試一次')
@@ -57,7 +63,8 @@ if not os.path.isdir(dirpath):
     os.mkdir(dirpath)
 try:
     with open(f'./users/{account}.json', 'r', encoding='utf-8') as obj:
-        f = json.load(obj)
+        user_dict = json.load(obj)  # 讀檔並轉成python字典型別，用user_dict接住
+    obj.close()
 except:
     first_time = True  # 該使用者是第一次使用
 
@@ -65,54 +72,43 @@ except:
 bsMain = BeautifulSoup(driver.page_source, 'lxml')  # BeautifulSoup抓課程總覽網頁
 if first_time:
     print('看起來你是第一次使用，讓我們先幫你擷取課程資料...')
-    time.sleep(3)
-    new_dict = {'1': {}, '2': {}, '3': {}, '4': {}, '5': {}}
-    table = bsMain.find('table', {'id': 'myTable'})
-    courseList = table.find_all('td', {'bgcolor': '#FFDCD7'})  # 粉紅色為本學期課程
+    time.sleep(2)  # 等待2秒
+    function.create_dict(bsMain, account)  # function.py
+    with open(f'./users/{account}.json', 'r', encoding='utf-8') as obj:
+        user_dict = json.load(obj)  # 讀檔並轉成python字典型別，用user_dict接住
+    obj.close()  # 關檔
 
-    # NOTE: 表格有7欄，只有第2, 5欄是我們要的
-    count = 0  # 範圍1~7，用來數現在爬到第幾欄，到7之後會歸零
-    temp_course = str()
-    temp_weekday = str()
-    for td in courseList:
-        count += 1
-        if (count == 2):
-            print('找到課程：', td.text)
-            temp_course = td.text
-        elif (count == 5):
-            temp_weekday = td.text[1]
-        elif (count == 7):
-            count = 0
-            new_dict[temp_weekday][temp_course] = []
-    print('\n課程爬取完成，正在建立檔案...')
-    with open(f'./users/{account}.json', 'w+', encoding='utf-8') as obj:
-        json.dump(new_dict, obj, indent=4, ensure_ascii=False)
-    print('已完成指定的工作！\n==========')
 
 # INFO: 程式主選單
-with open(f'./users/{account}.json', 'r', encoding='utf-8') as obj:
-    userDict = json.load(obj)  # 讀檔
 user_name = bsMain.find('table').find('font')  # 尋找學生姓名
-print('哈囉！', user_name.getText(), '\n今天是', y, '年',
-      m, '月', d, '日 ', wd_list[wd], sep='')
+print('哈囉！', user_name.getText(), '\n今天是', y, '年', m, '月', d, '日 ', wd_list[wd], sep='')  # 印出學生姓名跟今天日期
+function.init_course_list(user_dict, course_list)  # function.py
+function.list_course(user_dict, wd)  # function.py
 
-# NOTE: 根據禮拜幾來做出該有的互動，記得wd=0是星期一
-# 列出今天的課程
-if (wd == 0) or (wd == 1) or (wd == 2) or (wd == 3) or (wd == 4):
-    print('這是今天要上的課，記得做完蛤~')
-    for i in userDict[str(wd + 1)].keys():
-        print(i)
-else:
-    print('今天放假喔~休息一下吧！')
-
-# 列出明天的課程
-if (wd == 0) or (wd == 1) or (wd == 2) or (wd == 3):
-    print('\n明天要上的課')
-    for i in userDict[str(wd + 2)].keys():
-        print(i)
-elif (wd == 6):
-    print('\n明天要上的課')
-    for i in userDict[str(wd - 5)].keys():
-        print(i)
-else:
-    print('\n明天放假啦~去去去耍廢')
+# NOTE: 選單選項
+while (1):
+    print('主選單：\n 1 新增備忘錄\n 2 刪除備忘錄\n 3 列出今明兩天課程及備忘錄\n 4 重新建立使用者課程資料\n 0 離開\n')
+    choose = int(input('請選擇項目 '))
+    if (choose == 0):
+        print('掰波！')
+        sys.exit(0)
+    elif (choose == 1):
+        index = function.course_select(wd_list, course_list)  # function.py
+        if (index != None):
+            function.create_note(course_list, index, user_dict, account)
+    # TODO: 刪除備忘錄的函式
+    elif (choose == 3):
+        function.list_course(user_dict, wd)  # function.py
+    elif (choose == 4):
+        while (1):
+            confirm = int(input('警告：重新爬取課程將會取代原本的檔案，之前建立的備忘錄也會一併消失，確定要繼續？(0: 否/1: 是) '))
+            if (confirm == 0):
+                print('動作已中斷\n==========')
+                break
+            elif (confirm == 1):
+                function.create_dict(bsMain, account)  # function.py
+                break
+            else:
+                print('輸入的數值無效 請再試一次！\n')
+    else:
+        print('輸入的數值無效 請再試一次！\n==========')
